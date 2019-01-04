@@ -37,7 +37,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 
 
-	private void UpdateCachedRoomList (List<RoomInfo> roomList)
+	/*private void UpdateCachedRoomList (List<RoomInfo> roomList)
 	{
 		foreach (RoomInfo info in roomList)
 		{
@@ -61,14 +61,21 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	{
 		base.OnRoomListUpdate (roomList);
 		UpdateCachedRoomList (roomList);
-	}
+	}*/
 
 	// When you connect to the master server.
 	public override void OnConnectedToMaster ()
 	{
 		Debug.Log ("Connected to Master.");
-		//GameObject.Find ("_Scripts").GetComponent<MenuManager>().ChangeMenu (1);
 		JoinLobby();
+
+		// If in the Login Scene. Find the scene manager object and call the connected funtion
+		// to activate the buttons.
+		GameObject loginSceneManager = GameObject.Find ("_SceneObjectManager");
+		if (loginSceneManager != null)
+		{
+			loginSceneManager.GetComponent<LobbySceneManager> ().Connected ();
+		}
 	}
 
 	public void JoinLobby ()
@@ -89,7 +96,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public override void OnDisconnected(DisconnectCause cause)
 	{
 		Debug.LogWarningFormat ("Disconnected.", cause);
-		GameObject.Find ("_Scripts").GetComponent<MenuManager> ().ChangeMenu (0);
+		//TODO: On disconnected, return to log in menu.
 	}
 
 	// Connect to the network using the settings already applied
@@ -126,14 +133,16 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		} else {
 			Debug.Log ("Room Found!");
 
+			PhotonNetwork.JoinRandomRoom ();
+
 			//RoomInfo[] rooms = PhotonNetwork.GetCustomRoomList(TypedLobby.Default, "");
 
-			Dictionary<string, RoomInfo>.KeyCollection keys = m_cachedRoomList.Keys;
+			//Dictionary<string, RoomInfo>.KeyCollection keys = m_cachedRoomList.Keys;
 
-			foreach (string key in keys)
-			{
-				Debug.Log (m_cachedRoomList[key]);
-			}
+			//foreach (string key in keys)
+			//{
+			//	Debug.Log (m_cachedRoomList[key]);
+			//}
 
 		}
 	}
@@ -142,14 +151,30 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	{
 		Debug.Log ("Client joined room.");
 
-		if (PhotonNetwork.IsMasterClient && PhotonNetwork.IsConnected)
-		{
+		if (PhotonNetwork.IsMasterClient && PhotonNetwork.IsConnected) {
+			Debug.Log ("Client is master client.");
 			PhotonNetwork.Instantiate ("RoomManager", new Vector3 (0.0f, 0.0f, 0.0f),
-				Quaternion.Euler(0.0f, 0.0f, 0.0f), 0, null);
+				Quaternion.Euler (0.0f, 0.0f, 0.0f), 0, null);
 
 			GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().InitializeRoomSettings ();
+		} else {
+			Debug.Log ("Client is not Master Client.");
 		}
 
-		GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().OnPlayerJoined (PhotonNetwork.NickName);
+		PhotonView pv = PhotonView.Get (this);
+		pv.RPC ("ClientJoined", RpcTarget.All, (string)PhotonNetwork.NickName);
+	}
+
+	[PunRPC]
+	void ClientJoined (string username)
+	{
+		Debug.Log ("RPC Call Client: " + username + " joined room.");
+
+		if (PhotonNetwork.IsMasterClient && PhotonNetwork.IsConnected) {
+
+			GameObject roomManager = GameObject.FindGameObjectWithTag ("RoomManager");
+			roomManager.GetComponent<RoomManager> ().OnPlayerJoined (username);
+
+		}
 	}
 }

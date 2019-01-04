@@ -20,15 +20,20 @@ public class GameSettings : MonoBehaviour {
 
 
 	public GameObject tmp;
-	TextMeshProUGUI text;
+	//TextMeshProUGUI text;
 
 	public Game game;
 
 	// Use this for initialization
 	void Start () {
 		game = new Game ();
-		text = tmp.GetComponent<TextMeshProUGUI> ();
+		//text = tmp.GetComponent<TextMeshProUGUI> ();
 		SetupDefaultGame ();
+
+		GameObject.Find ("_GobanManager").GetComponent<DrawLineScript> ()
+			.MakeGoban ();
+		GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ()
+			.LoadStoneSettings ();
 	}
 
 	public void GameUpdate (Game newGame)
@@ -39,22 +44,22 @@ public class GameSettings : MonoBehaviour {
 	// Update settings text.
 	void UpdateSettingsText ()
 	{
-		text.text = "Board Size: " + game.boardSize.ToString () +
-		"\nPlayers: " + game.numPlayers.ToString ();
+		//text.text = "Board Size: " + game.boardSize.ToString () +
+		//"\nPlayers: " + game.numPlayers.ToString ();
 
-		if (game.ruleSet == 0){ text.text = text.text + "\nRule Set: Capture Go"; }
-		else if (game.ruleSet == 1){ text.text = text.text + "\nRule Set: Territory"; }
-		else if (game.ruleSet == 2){ text.text = text.text + "\nRule Set: One Color Go"; }
-		else if (game.ruleSet == 3){ text.text = text.text + "\nRule Set: Blind Go"; }
+		//if (game.ruleSet == 0){ text.text = text.text + "\nRule Set: Capture Go"; }
+		//else if (game.ruleSet == 1){ text.text = text.text + "\nRule Set: Territory"; }
+		//else if (game.ruleSet == 2){ text.text = text.text + "\nRule Set: One Color Go"; }
+		//else if (game.ruleSet == 3){ text.text = text.text + "\nRule Set: Blind Go"; }
 
-		if (game.timeSet == 0){ text.text = text.text + "\nTime Settings: 1m 10x3"; }
-		else if (game.timeSet == 1){ text.text = text.text + "\nTime Settings: 5m 30x3"; }
-		else if (game.timeSet == 2){ text.text = text.text + "\nTime Settings: 10m 30x5"; }
-		else if (game.timeSet == 3){ text.text = text.text + "\nTime Settings: 20m 30x5"; }
+		//if (game.timeSet == 0){ text.text = text.text + "\nTime Settings: 1m 10x3"; }
+		//else if (game.timeSet == 1){ text.text = text.text + "\nTime Settings: 5m 30x3"; }
+		//else if (game.timeSet == 2){ text.text = text.text + "\nTime Settings: 10m 30x5"; }
+		//else if (game.timeSet == 3){ text.text = text.text + "\nTime Settings: 20m 30x5"; }
 	}
 
 	// Set default room settigns
-	void SetupDefaultGame ()
+	public void SetupDefaultGame ()
 	{
 		game.boardSize = 9;
 		game.numPlayers = 2;
